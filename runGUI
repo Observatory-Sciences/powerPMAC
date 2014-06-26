@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd data
+edm -m "P=T1" -x ./powerPMAC.edl &

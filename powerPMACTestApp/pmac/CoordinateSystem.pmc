@@ -1,0 +1,13 @@
+&1 #1->X
+&1 #2->X
+
+OPEN PROG 1
+CLEAR
+X(P1)
+CLOSE
+
+OPEN PLC 1
+CLEAR
+P2=(Motor[1].Pos+Motor[2].Pos)/2
+CLOSE
+ENABLE PLC 1

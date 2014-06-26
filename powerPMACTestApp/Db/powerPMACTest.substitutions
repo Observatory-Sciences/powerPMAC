@@ -1,0 +1,18 @@
+file ../../../db/powerPMAC_motor.template {
+pattern {P,   M,  DESC, DTYP,      DIR, VELO,  VBAS, ACCL, BDST, BVEL, BACC, PORT,   ADDR, TIMEOUT, MRES,  PREC, EGU, DHLM,   DLLM,    INIT }
+{        T1:, M1, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 1,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M2, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 2,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M3, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 3,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M4, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 4,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M5, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 5,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M6, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 6,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M7, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 7,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M8, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 8,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+{        T1:, M9, Desc, asynMotor, 0,   300.0, 50.0, 1.0,  0.0,  0.0,  0.0,  PPMAC1, 9,    1.0,     0.001, 3,    um,  5000.0, -5000.0, 0 }
+}
+
+file ../../../db/powerPMAC_controller.template {
+pattern {P,   PORT,   ADDR, TIMEOUT }
+{        T1:, PPMAC1, 0,    1.0 }
+}
+

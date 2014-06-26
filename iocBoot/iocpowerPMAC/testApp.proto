@@ -1,0 +1,20 @@
+# Example protocol file for the Delta Tau Power PMAC
+
+InTerminator = ACK;
+OutTerminator = CR;
+ExtraInput = Ignore;
+
+# Accepts any string, replaces the input with the response
+debug {
+  out "%s";
+  in "%s";  
+}
+
+# Write out to an ACC59E DAC
+# Usage:  writeAcc59E(1, 1)
+#
+writeAcc59E {
+  out "Acc59E[\$1].DAC[\$2]=%d";
+}
+
+

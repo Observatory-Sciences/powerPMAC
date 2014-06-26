@@ -1,0 +1,42 @@
+record(motor,"$(P)$(M)")
+{
+	field(DESC,"$(DESC)")
+	field(DTYP,"$(DTYP)")
+	field(DIR,"$(DIR)")
+	field(VELO,"$(VELO)")
+	field(VBAS,"$(VBAS)")
+	field(ACCL,"$(ACCL)")
+	field(BDST,"$(BDST)")
+	field(BVEL,"$(BVEL)")
+	field(BACC,"$(BACC)")
+	field(OUT,"@asyn($(PORT),$(ADDR))")
+	field(MRES,"$(MRES)")
+	field(PREC,"$(PREC)")
+	field(EGU,"$(EGU)")
+	field(DHLM,"$(DHLM)")
+	field(DLLM,"$(DLLM)")
+	field(INIT,"$(INIT)")
+	field(RTRY,"$(RTRY=0)")
+	field(TWV,"1")
+}
+
+record(bo, "$(P)$(M):KILL")
+{
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_KILLAXIS")
+}
+
+record(longin, "$(P)$(M):STATUS0_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_AXISSTATUS0")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(M):STATUS1_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_AXISSTATUS1")
+    field(SCAN, "I/O Intr")
+}
+

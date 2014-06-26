@@ -1,0 +1,67 @@
+record(waveform, "$(P)CPU_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_CPU")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)FIRMWARE_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_FIRMWARE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)DATE_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_DATE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "$(P)PLCENABLE")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_PLCENABLE")
+}
+
+record(longout, "$(P)PLCDISABLE")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_PLCDISABLE")
+}
+
+record(longin, "$(P)PLCSTATUS0_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_PLCSTATUS0")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)PLCSTATUS1_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_PLCSTATUS1")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)GLOBALSTATUS_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_GLOBALSTATUS")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)COMMSERROR_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_COMMSERROR")
+    field(SCAN, "I/O Intr")
+}
+

@@ -1,0 +1,13 @@
+record(stringout, "T1:DEBUG")
+{
+  field(DTYP, "stream")
+  field(OUT,  "@testApp.proto debug SSH1")
+}
+
+record(longout, "T1:ACC59E-1:DAC-1")
+{
+  field(DTYP, "stream")
+  field(OUT,  "@testApp.proto writeAcc59E(1,1) SSH1")
+}
+
+
