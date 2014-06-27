@@ -159,7 +159,7 @@ powerPmacController::~powerPmacController(void)
  * @inputEos - String input EOS.
  * @outputEos - String output EOS.
  */
-int powerPmacController::lowLevelPortConnect(const char *port, int addr, asynUser **ppasynUser, char *inputEos, char *outputEos)
+int powerPmacController::lowLevelPortConnect(const char *port, int addr, asynUser **ppasynUser, const char *inputEos, const char *outputEos)
 {
   asynStatus status = asynSuccess;
   char command[64] = {0};
@@ -591,7 +591,7 @@ asynStatus powerPmacController::pmacSetOpenLoopEncoderAxis(int axis, int encoder
     }
     pA->encoder_axis_ = encoder_axis;
     asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-              "%s. Setting encoder axis &d for axis %d, on controller %s.\n", 
+              "%s. Setting encoder axis %d for axis %d, on controller %s.\n", 
               functionName, pA->encoder_axis_, pA->axisNo_, portName);
 
   } else {
