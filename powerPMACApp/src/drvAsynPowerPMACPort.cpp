@@ -60,7 +60,7 @@ static void
 closeConnection(asynUser *pasynUser,sshController_t *ssh,const char *why)
 {
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
-              "Close %s connection (fd %d): %s\n", ssh->SSHDeviceName, ssh->fd, why);
+              "Close %s connection (fd %p): %s\n", ssh->SSHDeviceName, ssh->fd, why);
     if (ssh->fd){
         ssh->fd->disconnectSSH();
         delete(ssh->fd);
@@ -204,7 +204,7 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
               "%s write.\n", ssh->SSHDeviceName);
     asynPrintIO(pasynUser, ASYN_TRACEIO_DRIVER, data, numchars,
-                "%s write %d\n", ssh->SSHDeviceName, numchars);
+                "%s write %lu\n", ssh->SSHDeviceName, (unsigned long)numchars);
     *nbytesTransfered = 0;
 
     // Here we will simply issue the write to the driver
