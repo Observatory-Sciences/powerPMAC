@@ -78,7 +78,7 @@ class powerPmacController : public asynMotorController {
   asynUser* lowLevelPortUser_;
   epicsUInt32 debugFlag_;
   epicsUInt32 movesDeferred_;
-  asynStatus lowLevelWriteRead(const char *command, char *response);
+  asynStatus lowLevelWriteRead(const char *command, char *response, size_t maxlen);
   int lowLevelPortConnect(const char *port, int addr, asynUser **ppasynUser, const char *inputEos, const char *outputEos);
   void debugFlow(const char *message);
 

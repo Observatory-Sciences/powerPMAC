@@ -96,7 +96,7 @@ asynStatus powerPmacAxis::getAxisInitialStatus(void)
 
   //sprintf(command, "I%d13 I%d14 I%d30 I%d31 I%d33", axisNo_, axisNo_, axisNo_, axisNo_, axisNo_);
   sprintf(command, "Motor[%d].MaxPos Motor[%d].MinPos Motor[%d].Servo.Kp Motor[%d].Servo.Kvfb Motor[%d].Servo.Ki", axisNo_, axisNo_, axisNo_, axisNo_, axisNo_);
-  cmdStatus = pC_->lowLevelWriteRead(command, response);
+  cmdStatus = pC_->lowLevelWriteRead(command, response, sizeof(response));
   //nvals = sscanf(response, "I%d=%lf\nI%d=%lf\nI%d=%lf\nI%d=%lf\nI%d=%lf", &dummy, &high_limit, &dummy, &low_limit, &dummy, &pgain, &dummy, &dgain, &dummy, &igain);
   nvals = sscanf(response, "Motor[%d].MaxPos=%lf\nMotor[%d].MinPos=%lf\nMotor[%d].Servo.Kp=%lf\nMotor[%d].Servo.Kvfb=%lf\nMotor[%d].Servo.Ki=%lf", &dummy, &high_limit, &dummy, &low_limit, &dummy, &pgain, &dummy, &dgain, &dummy, &igain);
 
@@ -144,7 +144,7 @@ asynStatus powerPmacAxis::move(double position, int relative, double min_velocit
 
   sprintf( command, "%s%s#%d %s%.2f", vel_buff, acc_buff, axisNo_, (relative?"J^":"J="), position/scale_ );
 
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
   
   return status;
 }
@@ -162,7 +162,7 @@ asynStatus powerPmacAxis::home(double min_velocity, double max_velocity, double 
 
   sprintf(command, "#%d HOME", axisNo_);
   
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
 
   return status;
 }
@@ -188,7 +188,7 @@ asynStatus powerPmacAxis::moveVelocity(double min_velocity, double max_velocity,
   }
   sprintf(command, "%s%s#%d %s", vel_buff, acc_buff, axisNo_, (max_velocity < 0 ? "J-": "J+") );
 
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
 
   return status;
 }
@@ -215,7 +215,7 @@ asynStatus powerPmacAxis::stop(double acceleration)
 
   sprintf( command, "#%d J/",  axisNo_ );
 
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
   return status;
 }
 
@@ -285,7 +285,7 @@ asynStatus powerPmacAxis::getAxisStatus(bool *moving)
     sprintf( command, "#%d ? F P Motor[%d].ServoCtrl", axisNo_, axisNo_);
   }
     
-  cmdStatus = pC_->lowLevelWriteRead(command, response);
+  cmdStatus = pC_->lowLevelWriteRead(command, response, sizeof(response));
   // Response parsed for PowerPMAC
   nvals = sscanf( response, "$%8x%8x\n%lf\n%lf\nMotor[%d].ServoCtrl=%d", &status[0], &status[1], &position, &enc_position, &dummy, &motorOn );
 	
@@ -356,7 +356,7 @@ asynStatus powerPmacAxis::getAxisStatus(bool *moving)
       // Check we haven't intentially disabled limits for homing.
       if (!limitsDisabled_) {
         sprintf( command, "Motor[%d].pLimits", axisNo_);
-        cmdStatus = pC_->lowLevelWriteRead(command, response);
+        cmdStatus = pC_->lowLevelWriteRead(command, response, sizeof(response));
         if (cmdStatus == asynSuccess) {
           sscanf(response, "Motor[%d].pLimits=%s", &dummy, command);
           if (strcmp(command, "0") == 0){
@@ -401,7 +401,7 @@ asynStatus powerPmacAxis::setIntegerParam(int function, int value)
   if (function == pC_->PMAC_C_KillAxis_){
     // Kill the axis
     sprintf( command, "#%dk", axisNo_);
-    cmdStatus = pC_->lowLevelWriteRead(command, response);
+    cmdStatus = pC_->lowLevelWriteRead(command, response, sizeof(response));
     if (cmdStatus != asynSuccess){
       return asynError;
     }
