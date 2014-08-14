@@ -21,6 +21,7 @@
  * driver debug messages.
  */
 //#define DEBUG 1
+//#define DEBUG_CTRL_CHARS
 
 #ifdef DEBUG
 #define debugPrint printf
@@ -213,9 +214,17 @@ SSHDriverStatus SSHDriver::connectSSH()
   // Here we should wait for the initial welcome line
   char buffer[1024];
   size_t bytes = 0;
-  read(buffer, 1024, &bytes, '\n', 1000);
-  // And the command line
-  read(buffer, 1024, &bytes, 0x20, 1000);
+  const char *ps1_last_txt = "!?%#";
+  for (int i=0; i <strlen(ps1_last_txt); i++)
+  {
+    // Set the prompt and read it back
+    sprintf(buffer, "PS1=%c\n", ps1_last_txt[i]);
+
+    write(buffer, strlen(buffer), &bytes, 1000);
+    read(buffer, 512, &bytes, ps1_last_txt[i], 3000);
+  }
+  /* Read the final '\n' */
+  read(buffer, 512, &bytes, '\n', 1000);
   debugPrint("%s : Connection ready...\n", functionName);
 
   return SSHDriverSuccess;
@@ -335,11 +344,28 @@ SSHDriverStatus SSHDriver::write(const char *buffer, size_t bufferSize, size_t *
   }
 
   buff[bytes] = '\0';
+#ifdef DEBUG_CTRL_CHARS
+  debugPrint("%s : Bytes =>\"", functionName);
+  for (int j = 0; j < bytes; j++){
+    char ch =  buff[j];
+    if (isprint(ch)) {
+      debugPrint("%c", ch);
+    } else if (ch == '\n') {
+      debugPrint("\\n");
+    } else if (ch == '\r') {
+      debugPrint("\\r");
+    } else {
+      debugPrint("\\%03o", ch);
+    }
+  }
+  debugPrint("\"\n");
+#else
   debugPrint("%s : Bytes =>\n", functionName);
   for (int j = 0; j < bytes; j++){
     debugPrint("[%d] ", buff[j]);
   }
   debugPrint("\n");
+#endif
 
   gettimeofday(&ctime, NULL);
   tnow = ((ctime.tv_sec - stime.tv_sec) * 1000) + (ctime.tv_usec / 1000);
@@ -385,7 +411,12 @@ SSHDriverStatus SSHDriver::read(char *buffer, size_t bufferSize, size_t *bytesRe
   int matchedindex = 0;
   int lastCount = 0;
   *bytesRead = 0;
+#ifdef DEBUG
+  memset(buffer, 0, bufferSize);
+#endif
   while ((matched == 0) && (tnow < mtimeout)){
+    /* TODO: Make sure that this loop does not run over bufferSize when
+     a match is not found and matched is never set to 1 */
     rc = libssh2_channel_read(channel_, &buffer[*bytesRead], (bufferSize-*bytesRead));
     if (rc > 0){
       *bytesRead+=rc;
@@ -406,11 +437,28 @@ SSHDriverStatus SSHDriver::read(char *buffer, size_t bufferSize, size_t *bytesRe
   }
 
   //buffer[matchedindex] = '\0';
+#ifdef DEBUG_CTRL_CHARS
+  debugPrint("%s : Bytes =>\"", functionName);
+  for (int j = 0; j < lastCount; j++){
+    char ch =  buffer[j];
+    if (isprint(ch)) {
+      debugPrint("%c", ch);
+    } else if (ch == '\n') {
+      debugPrint("\\n");
+    } else if (ch == '\r') {
+      debugPrint("\\r");
+    } else {
+      debugPrint("\\%03o", ch);
+    }
+  }
+  debugPrint("\"\n");
+#else
   debugPrint("%s : Bytes =>\n", functionName);
   for (int j = 0; j < lastCount; j++){
     debugPrint("[%d] ", buffer[j]);
   }
   debugPrint("\n");
+#endif
   debugPrint("%s : Matched %d\n", functionName, matched);
 
   if (matched == 1){
