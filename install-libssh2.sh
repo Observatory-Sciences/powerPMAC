@@ -16,13 +16,32 @@ then
     exit 1  
   fi 
   #apt or yum
-  if type apt-get 2>/dev/null; then
-    APTGET="sudo apt-get install"
-  else
-    if type yum 2>/dev/null; then
-      APTGET="sudo /usr/bin/yum install"
+  APTGET=/bin/false
+  uname_s=$(uname -s)
+  case $uname_s in
+    Darwin)
+    if type port 2>/dev/null; then
+      APTGET="sudo port install"
+    else
+      echo >&2 "It seams as if you run Mac OS X/Darwin"
+      echo >&2 "You need to install mac ports to run this script"
+      echo >&2 "https://www.macports.org/"
+      exit 1
     fi
-  fi
+    ;;
+    Linux)
+    if type apt-get 2>/dev/null; then
+      APTGET="sudo apt-get install"
+    else
+      if type yum 2>/dev/null; then
+        APTGET="sudo /usr/bin/yum install"
+      fi
+    fi
+    ;;
+    *)
+    echo >&2 "Unsupported system :$uname_s"
+    exit 1
+  esac
   export APTGET
   #
   #openssl
@@ -41,6 +60,10 @@ then
     (
       echo $APTGET libgcrypt-devel &&
       $APTGET libgcrypt-devel 
+    ) ||
+    (
+      echo $APTGET libgcrypt &&
+      $APTGET libgcrypt 
     ) 
   fi &&
   #
