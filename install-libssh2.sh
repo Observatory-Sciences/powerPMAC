@@ -4,6 +4,24 @@
 LIBSSH2_VER=1.4.3
 export LIBSSH2_VER
 
+wget_or_curl()
+{
+  url=$1
+  file=$2
+  if type wget >/dev/null; then
+    wget "$url" -O "$file.$$.tmp" &&
+    mv "$file.$$.tmp" "$file" || {
+      echo >&2 wget can not get $url
+      exit 1
+    }
+  else
+    curl "$url" >"$file.$$.tmp" &&
+    mv "$file.$$.tmp" "$file" || {
+      echo >&2 curl can not get $url
+      exit 1
+    }
+  fi
+}
 
 if ! test -e /usr/local/lib/libssh2.a;
 then
@@ -72,11 +90,7 @@ then
     $APTGET lbuild-essential
   fi &&
   if ! test -r libssh2-$LIBSSH2_VER.tar.gz; then
-    wget http://www.libssh2.org/download/libssh2-$LIBSSH2_VER.tar.gz -O libssh2-${LIBSSH2_VER}.tar.gz.$$.tmp &&
-    mv libssh2-${LIBSSH2_VER}.tar.gz.$$.tmp libssh2-${LIBSSH2_VER}.tar.gz || {
-      echo >&2 can not wget libssh2-${LIBSSH2_VER}.tar.gz
-      exit 1
-    }
+    wget_or_curl http://www.libssh2.org/download/libssh2-$LIBSSH2_VER.tar.gz libssh2-${LIBSSH2_VER}.tar.gz
   fi &&
   if ! test -d libssh2-$LIBSSH2_VER; then
     gunzip libssh2-$LIBSSH2_VER.tar.gz &&
