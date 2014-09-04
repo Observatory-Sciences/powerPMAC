@@ -188,21 +188,21 @@ int powerPmacController::lowLevelPortConnect(const char *port, int addr, asynUse
 
   // Read the CPU type
   sprintf(command, "cpu");
-  status = lowLevelWriteRead(command, response);
+  status = lowLevelWriteRead(command, response, sizeof(response));
   if (response[0] != 0 && status == asynSuccess) {
     setStringParam (PMAC_C_CPU_,  response);
   }
 
   // Read the firmware version
   sprintf(command, "vers");
-  status = lowLevelWriteRead(command, response);
+  status = lowLevelWriteRead(command, response, sizeof(response));
   if (response[0] != 0 && status == asynSuccess) {
     setStringParam (PMAC_C_Firmware_,  response);
   }
 
   // Read the firmware date
   sprintf(command, "date");
-  status = lowLevelWriteRead(command, response);
+  status = lowLevelWriteRead(command, response, sizeof(response));
   if (response[0] != 0 && status == asynSuccess) {
     setStringParam (PMAC_C_Date_,  response);
   }
@@ -238,7 +238,7 @@ asynStatus powerPmacController::printConnectedStatus()
  * @param command - String command to send.
  * @response response - String response back.
  */
-asynStatus powerPmacController::lowLevelWriteRead(const char *command, char *response)
+asynStatus powerPmacController::lowLevelWriteRead(const char *command, char *response, size_t maxlen)
 {
   asynStatus status = asynSuccess;
 
@@ -247,6 +247,10 @@ asynStatus powerPmacController::lowLevelWriteRead(const char *command, char *res
    size_t nread = 0;
    int commsError = 0;
    char sendString[2048];
+   char recbuf[PMAC_MAXBUF_];
+   size_t strlen_recbuf;
+
+   memset(recbuf, 0, sizeof(recbuf));
    sprintf(sendString, "%s\n", command);
    static const char *functionName = "pmacController::lowLevelWriteRead";
 
@@ -267,14 +271,28 @@ asynStatus powerPmacController::lowLevelWriteRead(const char *command, char *res
    if (!commsError) {
      status = pasynOctetSyncIO->writeRead(lowLevelPortUser_ ,
 					  sendString, strlen(sendString),
-					  response, PMAC_MAXBUF_,
+					  recbuf, sizeof(recbuf) - 1,
 					  PMAC_TIMEOUT_,
 					  &nwrite, &nread, &eomReason );
-     
-     if (strlen(response) > 1){
-       response[strlen(response)-2] = '\0';
+     strlen_recbuf = strlen(recbuf);
+     if (strlen_recbuf > 1) {
+       if (recbuf[strlen_recbuf-1] == '\n') {
+         --strlen_recbuf;
+         recbuf[strlen_recbuf] = '\0';
+       }
+       if (strlen_recbuf > 1) {
+         if (recbuf[strlen_recbuf-1] == '\r') {
+           --strlen_recbuf;
+           recbuf[strlen_recbuf] = '\0';
+         }
+       }
+     }
+     if (strlen_recbuf > maxlen - 1) {
+       asynPrint(lowLevelPortUser_, ASYN_TRACE_ERROR, "%s: Buffer too short in pasynOctetSyncIO->writeRead. command: %s recbuff: %s\n", functionName, command, recbuf);
+       memcpy(response, recbuf, maxlen - 1);
+       response[maxlen - 1] = '\0';
      } else {
-       response[0] = '\0';
+       memcpy(response, recbuf, strlen_recbuf + 1); /* inlcude '\0' */
      }
      if (status) {
        asynPrint(lowLevelPortUser_, ASYN_TRACE_ERROR, "%s: Error from pasynOctetSyncIO->writeRead. command: %s\n", functionName, command);
@@ -287,7 +305,7 @@ asynStatus powerPmacController::lowLevelWriteRead(const char *command, char *res
    }
 
    asynPrint(lowLevelPortUser_, ASYN_TRACEIO_DRIVER, "%s: response: %s\n", functionName, response); 
-   debugFlow("Received: ");
+   debugFlow("Response: ");
    debugFlow(response);
 
   return status;
@@ -297,9 +315,25 @@ asynStatus powerPmacController::lowLevelWriteRead(const char *command, char *res
 void powerPmacController::debugFlow(const char *message)
 {
   if (debugFlag_ == 1) {
+#ifdef DEBUGFLOW_ESCPAPE
+    size_t len = strlen(message);
+    for (unsigned j = 0; j < len; j++){
+      char ch =  message[j];
+      if (isprint(ch)) {
+        printf("%c", ch);
+      } else if (ch == '\n') {
+        printf("\\n");
+      } else if (ch == '\r') {
+        printf("\\r");
+      } else {
+        printf("\\%03o", ch);
+      }
+    }
+    printf("\n");
+#else
     printf("  %s\n", message);
+#endif
   }
-
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s\n", message);
 }
 
@@ -366,7 +400,7 @@ asynStatus powerPmacController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   //Execute the command.
   if (command[0] != 0 && status == asynSuccess) {
-    status = lowLevelWriteRead(command, response);
+    status = lowLevelWriteRead(command, response, sizeof(response));
   }
 
   //Call base class method
@@ -405,7 +439,7 @@ asynStatus powerPmacController::writeInt32(asynUser *pasynUser, epicsInt32 value
 
     //Execute the command.
     if (command[0] != 0) {
-      status = lowLevelWriteRead(command, response);
+      status = lowLevelWriteRead(command, response, sizeof(response));
     } else {
       // no controller specific functions, return error
       return asynError;
@@ -491,7 +525,7 @@ epicsUInt32 powerPmacController::getGlobalStatus(void)
 
   // Changed for Power PMAC status updates
   sprintf(command, "?");
-  if (lowLevelWriteRead(command, response) != asynSuccess) {
+  if (lowLevelWriteRead(command, response, sizeof(response)) != asynSuccess) {
     asynPrint(lowLevelPortUser_, ASYN_TRACE_ERROR, "%s: Error reading global status. command: %s\n", functionName, command);
     setIntegerParam(this->motorStatusCommsError_, 1);
     setIntegerParam(PMAC_C_CommsError_, 1);
@@ -504,7 +538,7 @@ epicsUInt32 powerPmacController::getGlobalStatus(void)
 
   // Read the status of PLC programs 0..31
   sprintf(command, "Plc[0].Running Plc[1].Running Plc[2].Running Plc[3].Running Plc[4].Running Plc[5].Running Plc[6].Running Plc[7].Running Plc[8].Running Plc[9].Running Plc[10].Running Plc[11].Running Plc[12].Running Plc[13].Running Plc[14].Running Plc[15].Running Plc[16].Running Plc[17].Running Plc[18].Running Plc[19].Running Plc[20].Running Plc[21].Running Plc[22].Running Plc[23].Running Plc[24].Running Plc[25].Running Plc[26].Running Plc[27].Running Plc[28].Running Plc[29].Running Plc[30].Running Plc[31].Running");
-  if (lowLevelWriteRead(command, response) == asynSuccess) {
+  if (lowLevelWriteRead(command, response, sizeof(response)) == asynSuccess) {
     sscanf(response, "Plc[0].Running=%d\nPlc[1].Running=%d\nPlc[2].Running=%d\nPlc[3].Running=%d\nPlc[4].Running=%d\nPlc[5].Running=%d\nPlc[6].Running=%d\nPlc[7].Running=%d\nPlc[8].Running=%d\nPlc[9].Running=%d\nPlc[10].Running=%d\nPlc[11].Running=%d\nPlc[12].Running=%d\nPlc[13].Running=%d\nPlc[14].Running=%d\nPlc[15].Running=%d\nPlc[16].Running=%d\nPlc[17].Running=%d\nPlc[18].Running=%d\nPlc[19].Running=%d\nPlc[20].Running=%d\nPlc[21].Running=%d\nPlc[22].Running=%d\nPlc[23].Running=%d\nPlc[24].Running=%d\nPlc[25].Running=%d\nPlc[26].Running=%d\nPlc[27].Running=%d\nPlc[28].Running=%d\nPlc[29].Running=%d\nPlc[30].Running=%d\nPlc[31].Running=%d\n", &plc[0], &plc[1], &plc[2], &plc[3], &plc[4], &plc[5], &plc[6], &plc[7], &plc[8], &plc[9], &plc[10], &plc[11], &plc[12], &plc[13], &plc[14], &plc[15], &plc[16], &plc[17], &plc[18], &plc[19], &plc[20], &plc[21], &plc[22], &plc[23], &plc[24], &plc[25], &plc[26], &plc[27], &plc[28], &plc[29], &plc[30], &plc[31]);
     // Record the first 16 PLC execution states
     plcStatus = plc[0];

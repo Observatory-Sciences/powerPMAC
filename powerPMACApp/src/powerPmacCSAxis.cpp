@@ -96,7 +96,7 @@ asynStatus powerPmacCSAxis::getAxisInitialStatus(void)
   static const char *functionName = "powerPmacCSAxis::getAxisInitialStatus";
 
   sprintf(command, "Coord[%d].FeedTime", coordSysNo_); 
-  cmdStatus = pC_->lowLevelWriteRead(command, response);
+  cmdStatus = pC_->lowLevelWriteRead(command, response, sizeof(response));
   nvals = sscanf(response, "Coord[%d].FeedTime=%lf", &dummy, &feedTime_); 
 
   if (cmdStatus || nvals != 2) {
@@ -137,16 +137,16 @@ asynStatus powerPmacCSAxis::move(double position, int relative, double min_veloc
 
   // Set the position variable to the position, then execute the motion program
   sprintf( command, "%s%s", vel_buff, acc_buff );
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
 
   if (relative){
     dmdpos = previous_position_;
   }
   dmdpos += position;
   sprintf( command, "%s=%.2f", demandVar_, dmdpos/scale_ );
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
   sprintf( command, "&%db%dr", coordSysNo_, motionProgNo_ );
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
     
   return status;
 }
@@ -195,7 +195,7 @@ asynStatus powerPmacCSAxis::stop(double acceleration)
 
   sprintf( command, "&%da",  coordSysNo_ );
 
-  status = pC_->lowLevelWriteRead(command, response);
+  status = pC_->lowLevelWriteRead(command, response, sizeof(response));
   return status;
 }
 
@@ -257,7 +257,7 @@ asynStatus powerPmacCSAxis::getAxisStatus(bool *moving)
 printf("Scale: %d\n", scale_);
   sprintf( command, "Coord[%d].Status[0] Coord[%d].Status[1] %s", coordSysNo_,  coordSysNo_, readbackVar_);    
 
-  cmdStatus = pC_->lowLevelWriteRead(command, response);
+  cmdStatus = pC_->lowLevelWriteRead(command, response, sizeof(response));
   // Response parsed for PowerPMAC
   nvals = sscanf( response, "Coord[%d].Status[0]=$%x\nCoord[%d].Status[1]=$%x\n%[^=]=%lf", &dummy, &status[0], &dummy, &status[1], command, &position );
 	

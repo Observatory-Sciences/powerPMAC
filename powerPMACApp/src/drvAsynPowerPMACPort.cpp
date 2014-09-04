@@ -172,7 +172,8 @@ asynCommonConnect(void *drvPvt, asynUser *pasynUser)
 {
     asynStatus status = asynSuccess;
 
-    status = connectIt(drvPvt, pasynUser);
+    /* Do not connect here, since connectIt() is not thread save */
+    /* status = connectIt(drvPvt, pasynUser); */
 
     if (status == asynSuccess)
         pasynManager->exceptionConnect(pasynUser);
@@ -422,12 +423,7 @@ drvAsynPowerPMACPortConfigure(const char *portName,
     if (!noProcessEos)
         asynInterposeEosConfig(ssh->portName, -1, 1, 1);
     ssh->pasynUser = pasynManager->createAsynUser(0,0);
-    status = pasynManager->connectDevice(ssh->pasynUser,ssh->portName,-1);
-    if(status != asynSuccess) {
-        printf("connectDevice failed %s\n",ssh->pasynUser->errorMessage);
-        sshCleanup(ssh);
-        return -1;
-    }
+    /* Do not connect here, since connectIt() is not thread save */
 
     /*
      * Register for socket cleanup
