@@ -181,9 +181,6 @@ int powerPmacController::lowLevelPortConnect(const char *port, int addr, asynUse
     return status;
   }
 
-  // Ensure the gpascii application has time to start up
-  epicsThreadSleep(1.0);
-
   status = pasynOctetSyncIO->setInputEos(*ppasynUser, inputEos, strlen(inputEos));
 
   // Read the CPU type

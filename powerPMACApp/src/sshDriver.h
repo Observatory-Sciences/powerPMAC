@@ -54,6 +54,7 @@ class SSHDriver {
     SSHDriverStatus flush();
     SSHDriverStatus write(const char *buffer, size_t bufferSize, size_t *bytesWritten, int timeout);
     SSHDriverStatus read(char *buffer, size_t bufferSize, size_t *bytesRead, int readTerm, int timeout);
+    SSHDriverStatus syncInteractive(const char *snd_str,  const char *exp_str);
     SSHDriverStatus disconnectSSH();
     virtual ~SSHDriver();
 

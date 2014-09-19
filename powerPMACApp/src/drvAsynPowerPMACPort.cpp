@@ -156,12 +156,13 @@ connectIt(void *drvPvt, asynUser *pasynUser)
       return asynError;
     }
 
-  // Start up the remote gpascii application
-  char buff[512];
-  size_t bytes = 0;
-  strcpy(buff, "gpascii\n");
-  ssh->fd->write(buff, strlen(buff), &bytes, 1000);
-  ssh->fd->read(buff, 512, &bytes, '\n', 1000);
+    // Start up the remote gpascii application
+    char buff[512];
+    size_t bytes = 0;
+    const static char *gpascii_txt = "gpascii\n";
+    ssh->fd->write(gpascii_txt, strlen(gpascii_txt), &bytes, 1000);
+    ssh->fd->read(buff, sizeof(buff), &bytes, '\n', 1000);
+    ssh->fd->syncInteractive("#\n", "\006");
 
     asynPrint(pasynUser, ASYN_TRACE_FLOW, "Opened connection to %s\n", ssh->SSHDeviceName);
     return asynSuccess;
