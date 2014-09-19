@@ -7,6 +7,23 @@ record(waveform, "$(P)CPU_RBV")
     field(SCAN, "I/O Intr")
 }
 
+record(waveform, "$(P)CPU_TEMP_A_RBV") {
+  field(DTYP, "asynOctetRead")
+  field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_CPU_TEMP_A")
+  field(FTVL, "CHAR")
+  field(NELM, "256")
+  field(SCAN, "5 second")
+}
+
+record(ai, "$(P)CPU_TEMP_V_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PMAC_C_CPU_TEMP_V")
+  field(SCAN, "I/O Intr")
+  field(EGU,  "°C")
+  field(PREC, "2")
+  field(DESC, "CPU Temp")
+}
+
 record(waveform, "$(P)FIRMWARE_RBV")
 {
     field(DTYP, "asynOctetRead")

@@ -116,6 +116,8 @@ powerPmacController::powerPmacController(const char *portName, const char *lowLe
   createParam(PMAC_C_GlobalStatusString,       asynParamInt32, &PMAC_C_GlobalStatus_);
   createParam(PMAC_C_CommsErrorString,         asynParamInt32, &PMAC_C_CommsError_);
   createParam(PMAC_C_CPUString,                asynParamOctet, &PMAC_C_CPU_);
+  createParam(PMAC_C_CPUTempAString,           asynParamOctet, &PMAC_C_CPU_TEMP_A_);
+  createParam(PMAC_C_CPUTempVString,           asynParamFloat64, &PMAC_C_CPU_TEMP_V_);
   createParam(PMAC_C_FirmwareString,           asynParamOctet, &PMAC_C_Firmware_);
   createParam(PMAC_C_DateString,               asynParamOctet, &PMAC_C_Date_);
   createParam(PMAC_C_PLCStatus0String,         asynParamInt32, &PMAC_C_PLCStatus0_);
@@ -456,6 +458,43 @@ asynStatus powerPmacController::writeInt32(asynUser *pasynUser, epicsInt32 value
   }
   return status;
 
+}
+
+
+asynStatus powerPmacController::readOctet(asynUser *pasynUser,
+                            char *value, size_t maxChars, size_t *nActual,
+                            int *eomReason)
+{
+  int function = pasynUser->reason;
+  asynStatus status = asynError;
+  static const char *functionName = "powerPmacController::readOctet";
+  debugFlow(functionName);
+
+  if (function == PMAC_C_CPU_TEMP_A_) {
+    static const char *command = "Sys.CpuTemp";
+    size_t ret = 0;
+    double tempCelsius = 0;
+    const char *tempAscii;
+    status = lowLevelWriteRead(command, value, maxChars-1);
+    if (value[0] != 0 && status == asynSuccess) {
+      ret = strlen(value);
+      value[ret] = '\0';
+      tempAscii = strstr(value, "=");
+      if (tempAscii) {
+        int nvals;
+        tempAscii += 1; /* Jump over '=' */
+        nvals = sscanf(tempAscii, "%lf", &tempCelsius);
+        if (nvals == 1) {
+          setDoubleParam(PMAC_C_CPU_TEMP_V_, tempCelsius);
+        }
+      }
+    }
+    *nActual = ret;
+    *eomReason = 0;
+    status = asynSuccess;
+  }
+
+  return status;
 }
 
 

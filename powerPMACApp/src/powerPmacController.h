@@ -22,6 +22,8 @@
 #define PMAC_C_GlobalStatusString "PMAC_C_GLOBALSTATUS"
 #define PMAC_C_CommsErrorString "PMAC_C_COMMSERROR"
 #define PMAC_C_CPUString "PMAC_C_CPU"
+#define PMAC_C_CPUTempAString "PMAC_C_CPU_TEMP_A"
+#define PMAC_C_CPUTempVString "PMAC_C_CPU_TEMP_V"
 #define PMAC_C_FirmwareString "PMAC_C_FIRMWARE"
 #define PMAC_C_DateString "PMAC_C_DATE"
 #define PMAC_C_PLCStatus0String "PMAC_C_PLCSTATUS0"
@@ -36,6 +38,9 @@ class powerPmacController : public asynMotorController {
 
  public:
   powerPmacController(const char *portName, const char *lowLevelPortName, int lowLevelPortAddress, int numAxes, double movingPollPeriod, double idlePollPeriod);
+  asynStatus readOctet(asynUser *pasynUser,
+                       char *value, size_t maxChars, size_t *nActual,
+                       int *eomReason);
 
   virtual ~powerPmacController();
 
@@ -62,6 +67,8 @@ class powerPmacController : public asynMotorController {
   int PMAC_C_GlobalStatus_;
   int PMAC_C_CommsError_;
   int PMAC_C_CPU_;
+  int PMAC_C_CPU_TEMP_A_;
+  int PMAC_C_CPU_TEMP_V_;
   int PMAC_C_Firmware_;
   int PMAC_C_Date_;
   int PMAC_C_PLCStatus0_;
