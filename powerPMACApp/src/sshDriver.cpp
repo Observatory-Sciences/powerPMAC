@@ -21,12 +21,33 @@
  * driver debug messages.
  */
 //#define DEBUG 1
-//#define DEBUG_CTRL_CHARS
 
 #ifdef DEBUG
 #define debugPrint printf
+
+void debugStrPrintEscapedNL(const char *buff, size_t bytes)
+{
+  for (unsigned int j = 0; j < bytes; j++){
+    char ch =  buff[j];
+    if (isprint(ch)) {
+      debugPrint("%c", ch);
+    } else if (ch == '\n') {
+      debugPrint("\\n");
+    } else if (ch == '\r') {
+      debugPrint("\\r");
+    } else {
+      debugPrint("\\%03o", ch);
+    }
+  }
+  debugPrint("\n");
+}
 #else
 void debugPrint(...){}
+void debugStrPrintEscapedNL(const char *buff, size_t bytes)
+{
+  (void)buff;
+  (void)bytes;
+}
 #endif
 
 /**
@@ -304,7 +325,8 @@ SSHDriverStatus SSHDriver::write(const char *buffer, size_t bufferSize, size_t *
   strncpy(input, buffer, bufferSize);
   input[bufferSize] = 0;
   flush();
-  debugPrint("%s : Writing => %s\n", functionName, input);
+  debugPrint("%s : Writing => ", functionName);
+  debugStrPrintEscapedNL(buffer, bufferSize);
 
   int rc = libssh2_channel_write(channel_, buffer, bufferSize);
   if (rc > 0){
@@ -344,28 +366,8 @@ SSHDriverStatus SSHDriver::write(const char *buffer, size_t bufferSize, size_t *
   }
 
   buff[bytes] = '\0';
-#ifdef DEBUG_CTRL_CHARS
-  debugPrint("%s : Bytes =>\"", functionName);
-  for (int j = 0; j < bytes; j++){
-    char ch =  buff[j];
-    if (isprint(ch)) {
-      debugPrint("%c", ch);
-    } else if (ch == '\n') {
-      debugPrint("\\n");
-    } else if (ch == '\r') {
-      debugPrint("\\r");
-    } else {
-      debugPrint("\\%03o", ch);
-    }
-  }
-  debugPrint("\"\n");
-#else
-  debugPrint("%s : Bytes =>\n", functionName);
-  for (int j = 0; j < bytes; j++){
-    debugPrint("[%d] ", buff[j]);
-  }
-  debugPrint("\n");
-#endif
+  debugPrint("%s : BytesEchoedBack (%d) => ", functionName, bytes);
+  debugStrPrintEscapedNL(buff, bytes);
 
   gettimeofday(&ctime, NULL);
   tnow = ((ctime.tv_sec - stime.tv_sec) * 1000) + (ctime.tv_usec / 1000);
@@ -393,8 +395,10 @@ SSHDriverStatus SSHDriver::write(const char *buffer, size_t bufferSize, size_t *
 SSHDriverStatus SSHDriver::read(char *buffer, size_t bufferSize, size_t *bytesRead, int readTerm, int timeout)
 {
   static const char *functionName = "SSHDriver::read";
+  char ch = readTerm;
   debugPrint("%s : Method called\n", functionName);
-  debugPrint("%s : Read terminator %d\n", functionName, readTerm);
+  debugPrint("%s : Read terminator %d ", functionName, readTerm);
+  debugStrPrintEscapedNL(&ch, sizeof(ch));
 
   if (connected_ == 0){
     debugPrint("%s : Not connected\n", functionName);
@@ -437,35 +441,16 @@ SSHDriverStatus SSHDriver::read(char *buffer, size_t bufferSize, size_t *bytesRe
   }
 
   //buffer[matchedindex] = '\0';
-#ifdef DEBUG_CTRL_CHARS
-  debugPrint("%s : Bytes =>\"", functionName);
-  for (int j = 0; j < lastCount; j++){
-    char ch =  buffer[j];
-    if (isprint(ch)) {
-      debugPrint("%c", ch);
-    } else if (ch == '\n') {
-      debugPrint("\\n");
-    } else if (ch == '\r') {
-      debugPrint("\\r");
-    } else {
-      debugPrint("\\%03o", ch);
-    }
-  }
-  debugPrint("\"\n");
-#else
-  debugPrint("%s : Bytes =>\n", functionName);
-  for (int j = 0; j < lastCount; j++){
-    debugPrint("[%d] ", buffer[j]);
-  }
-  debugPrint("\n");
-#endif
-  debugPrint("%s : Matched %d\n", functionName, matched);
+  debugPrint("%s : %d Bytes => ", functionName, lastCount);
+  debugStrPrintEscapedNL(buffer, lastCount);
 
   if (matched == 1){
     lastCount = matchedindex+1;
   }
   *bytesRead = lastCount;
-  debugPrint("%s : Line => %s", functionName, buffer);
+  debugPrint("%s : Matched %d lastCount=%d\n", functionName, matched, lastCount);
+  debugPrint("%s : Line => ", functionName);
+  debugStrPrintEscapedNL(buffer, lastCount);
 
   gettimeofday(&ctime, NULL);
   tnow = ((ctime.tv_sec - stime.tv_sec) * 1000) + (ctime.tv_usec / 1000);
