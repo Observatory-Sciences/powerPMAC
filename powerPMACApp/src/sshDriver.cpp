@@ -236,7 +236,7 @@ SSHDriverStatus SSHDriver::connectSSH()
   char buffer[1024];
   size_t bytes = 0;
   const char *ps1_last_txt = "!?%#";
-  for (int i=0; i <strlen(ps1_last_txt); i++)
+  for (unsigned int i=0; i <strlen(ps1_last_txt); i++)
   {
     // Set the prompt and read it back
     sprintf(buffer, "PS1=%c\n", ps1_last_txt[i]);
@@ -462,6 +462,45 @@ SSHDriverStatus SSHDriver::read(char *buffer, size_t bufferSize, size_t *bytesRe
 
   return SSHDriverSuccess;
 }
+
+
+/**
+ * Sync the connection.
+ *
+ * @return - Success or failure.
+ */
+SSHDriverStatus SSHDriver::syncInteractive(const char *snd_str,  const char *exp_str)
+{
+  static const char *functionName = "SSHDriver::syncInteractive";
+  size_t exp_str_len = strlen(exp_str);
+  char buff[512];
+  size_t bytes = 0;
+  int terminator = exp_str[exp_str_len-1];
+  SSHDriverStatus status = SSHDriverError;
+
+  debugPrint("%s : Method called exp_str => ", functionName);
+  debugStrPrintEscapedNL(exp_str, exp_str_len);
+
+  debugPrint("%s : snd_str => ", functionName);
+  debugStrPrintEscapedNL(snd_str, strlen(snd_str));
+
+  for (unsigned int cnt = 0; cnt < 10; cnt++) {
+    write(snd_str, strlen(snd_str), &bytes, 1000);
+    buff[0] = 0;
+    read(buff, sizeof(buff), &bytes, terminator, 1000);
+
+    if (bytes == strlen(exp_str) && !memcmp(exp_str, buff, bytes)) {
+      status = SSHDriverSuccess;
+    }
+    debugPrint("%s : status=%d bytes=%lu rec_str => ", functionName, (int)status, (unsigned long)bytes);
+    debugStrPrintEscapedNL(buff, bytes);
+    if (status == SSHDriverSuccess) {
+      return status;
+    }
+  }
+  return SSHDriverError;
+}
+
 
 /**
  * Close the connection.
