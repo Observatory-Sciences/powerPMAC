@@ -19,31 +19,53 @@
 /*
  * Uncomment the DEBUG define and recompile for lots of
  * driver debug messages.
+ * Uncomment LOGCOM if you want to see the communication
  */
 //#define DEBUG 1
+//#define LOGCOM 1
 
-#ifdef DEBUG
-#define debugPrint printf
-
-void debugStrPrintEscapedNL(const char *buff, size_t bytes)
+#if defined(DEBUG) || defined(LOGCOM)
+void PrintEscapedNL(const char *buff, size_t bytes)
 {
   for (unsigned int j = 0; j < bytes; j++){
     char ch =  buff[j];
     if (isprint(ch)) {
-      debugPrint("%c", ch);
+      printf("%c", ch);
+    } else if (ch == '\\') {
+      printf("\\\\");
+    } else if (ch == '\t') {
+      printf("\\t");
     } else if (ch == '\n') {
-      debugPrint("\\n");
+      printf("\\n");
     } else if (ch == '\r') {
-      debugPrint("\\r");
+      printf("\\r");
     } else {
-      debugPrint("\\%03o", ch);
+      printf("\\%03o", ch);
     }
   }
-  debugPrint("\n");
+  printf("\n");
 }
+#endif
+
+
+#ifdef DEBUG
+#define debugPrint printf
+#define debugStrPrintEscapedNL(a,b) PrintEscapedNL((a),(b))
 #else
 void debugPrint(...){}
 void debugStrPrintEscapedNL(const char *buff, size_t bytes)
+{
+  (void)buff;
+  (void)bytes;
+}
+#endif
+
+#ifdef LOGCOM
+#define LogComPrint printf
+#define LogComStrPrintEscapedNL(a,b) PrintEscapedNL((a),(b))
+#else
+void LogComPrint(...){}
+void LogComStrPrintEscapedNL(const char *buff, size_t bytes)
 {
   (void)buff;
   (void)bytes;
@@ -325,8 +347,8 @@ SSHDriverStatus SSHDriver::write(const char *buffer, size_t bufferSize, size_t *
   strncpy(input, buffer, bufferSize);
   input[bufferSize] = 0;
   flush();
-  debugPrint("%s : Writing => ", functionName);
-  debugStrPrintEscapedNL(buffer, bufferSize);
+  LogComPrint("LogCom sshDriver Writing %02lu bytes => ", (unsigned long)bufferSize);
+  LogComStrPrintEscapedNL(buffer, bufferSize);
 
   int rc = libssh2_channel_write(channel_, buffer, bufferSize);
   if (rc > 0){
@@ -366,8 +388,8 @@ SSHDriverStatus SSHDriver::write(const char *buffer, size_t bufferSize, size_t *
   }
 
   buff[bytes] = '\0';
-  debugPrint("%s : BytesEchoedBack (%d) => ", functionName, bytes);
-  debugStrPrintEscapedNL(buff, bytes);
+  LogComPrint("LogCom sshDriver Echoed  %02d bytes => ", bytes);
+  LogComStrPrintEscapedNL(buff, bytes);
 
   gettimeofday(&ctime, NULL);
   tnow = ((ctime.tv_sec - stime.tv_sec) * 1000) + (ctime.tv_usec / 1000);
@@ -449,8 +471,8 @@ SSHDriverStatus SSHDriver::read(char *buffer, size_t bufferSize, size_t *bytesRe
   }
   *bytesRead = lastCount;
   debugPrint("%s : Matched %d lastCount=%d\n", functionName, matched, lastCount);
-  debugPrint("%s : Line => ", functionName);
-  debugStrPrintEscapedNL(buffer, lastCount);
+  LogComPrint("LogCom sshDriver Reading %02d bytes => ", lastCount);
+  LogComStrPrintEscapedNL(buffer, lastCount);
 
   gettimeofday(&ctime, NULL);
   tnow = ((ctime.tv_sec - stime.tv_sec) * 1000) + (ctime.tv_usec / 1000);
