@@ -13,7 +13,6 @@ DBD += powerPMACTest.dbd
 # powetPMACTest.dbd will be made up from these files:
 powerPMACTest_DBD += base.dbd
 powerPMACTest_DBD += asyn.dbd
-powerPMACTest_DBD += motorRecord.dbd
 powerPMACTest_DBD += motorSupport.dbd
 powerPMACTest_DBD += powerPMACMotorSSH.dbd
 powerPMACTest_DBD += drvAsynPowerPMACPort.dbd
