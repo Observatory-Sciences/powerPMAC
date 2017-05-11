@@ -6,7 +6,7 @@ install:
 	cp -f $(TOP)/powerPMACApp/opi/powerPMAC.opi $(TOP)/data/powerPMAC.opi
 	cp -f $(TOP)/powerPMACApp/opi/motor.opi $(TOP)/data/motor.opi
 
-clean::
+clean:
 	rm -rf $(TOP)/data
 
 include $(TOP)/configure/RULES
