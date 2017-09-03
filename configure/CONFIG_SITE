@@ -31,3 +31,7 @@ CHECK_RELEASE = YES
 # You must rebuild in the iocBoot directory for this to
 #   take effect.
 #IOCS_APPL_TOP = </IOC/path/to/application/top>
+
+# Define the ssh2_DIR to be the location of ssh2 library
+#ssh2_DIR = /usr/local/lib
+ssh2_DIR = /usr/lib64

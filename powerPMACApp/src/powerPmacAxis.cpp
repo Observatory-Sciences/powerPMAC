@@ -106,9 +106,9 @@ asynStatus powerPmacAxis::getAxisInitialStatus(void)
   } else {
     setDoubleParam(pC_->motorLowLimit_,  low_limit*scale_);
     setDoubleParam(pC_->motorHighLimit_, high_limit*scale_);
-    setDoubleParam(pC_->motorPgain_,     pgain);
-    setDoubleParam(pC_->motorIgain_,     igain);
-    setDoubleParam(pC_->motorDgain_,     dgain);
+    setDoubleParam(pC_->motorPGain_,     pgain);
+    setDoubleParam(pC_->motorIGain_,     igain);
+    setDoubleParam(pC_->motorDGain_,     dgain);
     setIntegerParam(pC_->motorStatusHasEncoder_, 1);
   }
   return asynSuccess;

@@ -25,10 +25,10 @@ TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 #SNCSEQ=$(EPICS_BASE)/../modules/soft/seq
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/usr/lib/epics
-ASYN=/usr/lib/epics/asyn4-18
-MOTOR=/usr/lib/epics/motorR6-7-1
-STREAM=/usr/lib/epics/stream2-6
+EPICS_BASE=/usr/local/epics-devel/base-3.15.5
+ASYN=/corvette/home/epics/devel/asyn-4-31
+MOTOR=/corvette/home/epics/devel/motor-6-9
+STREAM=/corvette/home/epics/devel/stream-2-7-7
 
 # Set RULES here if you want to take build rules from somewhere
 # other than EPICS_BASE:

@@ -19,7 +19,7 @@ install:
 	cp -f $(TOP)/powerPMACApp/edl/motor-alarms.edl $(TOP)/data/motor-alarms.edl
 	cp -f $(TOP)/powerPMACApp/edl/motor-cmd-confirm.edl $(TOP)/data/motor-cmd-confirm.edl
 
-clean::
+clean:
 	rm -rf $(TOP)/data
 
 include $(TOP)/configure/RULES

@@ -12,6 +12,8 @@ LIBRARY_IOC += powerPMACSupport
 DBD += powerPMACMotorSSH.dbd
 DBD += drvAsynPowerPMACPort.dbd
 
+# Note: ssh2_DIR should be defined in configure/CONFIG_SITE
+
 # Link locally-provided code into the support library,
 powerPMACSupport_SRCS += sshDriver.cpp
 powerPMACSupport_SRCS += powerPmacController.cpp
@@ -23,7 +25,6 @@ powerPMACSupport_LIBS += asyn
 powerPMACSupport_LIBS += motor
 powerPMACSupport_LIBS += ssh2
 powerPMACSupport_LIBS += $(EPICS_BASE_IOC_LIBS)
-ssh2_DIR = /usr/local/lib
 
 #=============================
 # Build the interactive shell test application
@@ -37,7 +38,6 @@ powerPMACShell_LIBS += powerPMACSupport
 powerPMACShell_LIBS += asyn
 powerPMACShell_LIBS += motor
 powerPMACShell_LIBS += ssh2
-ssh2_DIR = /usr/local/lib
 
 # Finally link to the EPICS Base libraries
 powerPMACShell_LIBS += $(EPICS_BASE_IOC_LIBS)
